@@ -7,7 +7,7 @@ import colorsys
 import math
 import json
 import requests
-import st7735 as ST7735
+import st7735
 import os
 import time
 from datetime import datetime, timedelta
@@ -63,7 +63,7 @@ bus = SMBus(1)
 bme280 = BME280(i2c_dev=bus)
 
 # Create an LCD instance
-disp = ST7735.ST7735(
+disp = st7735.ST7735(
     port=0,
     cs=1,
     dc=9,
