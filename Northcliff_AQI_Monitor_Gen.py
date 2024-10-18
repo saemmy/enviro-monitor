@@ -2,7 +2,7 @@
 #Northcliff Environment Monitor
 # Requires Home Manager >=8.54 with Enviro Monitor timeout
 
-import paho.mqtt.client as mqtt
+from paho.mqtt import client as mqtt
 import colorsys
 import math
 import json
@@ -77,7 +77,7 @@ disp.begin()
 
 def retrieve_config():
     try:
-        with open('<Your config.json file location>', 'r') as f:
+        with open('Config/config.json', 'r') as f:
             parsed_config_parameters = json.loads(f.read())
             print('Retrieved Config', parsed_config_parameters)
     except IOError:
@@ -202,8 +202,7 @@ if enable_noise:
     import sounddevice as sd
     import numpy as np
     from numpy import pi, log10
-    from scipy.signal import zpk2tf, zpk2sos, freqs, sosfilt
-    from waveform_analysis.weighting_filters._filter_design import _zpkbilinear
+    from scipy.signal import bilinear_zpk, zpk2tf, zpk2sos, freqs, sosfilt
                
 def read_pm_values(luft_values, mqtt_values, own_data, own_disp_values):
     if enable_particle_sensor:
@@ -1656,7 +1655,7 @@ def A_weighting(fs, output='ba'):
     z, p, k = ABC_weighting('A')
 
     # Use the bilinear transformation to get the digital filter.
-    z_d, p_d, k_d = _zpkbilinear(z, p, k, fs)
+    z_d, p_d, k_d = bilinear_zpk(z, p, k, fs)
 
     if output == 'zpk':
         return z_d, p_d, k_d
@@ -1901,7 +1900,8 @@ logging.info("Wi-Fi: {}\n".format("connected" if check_wifi() else "disconnected
 if enable_send_data_to_homemanager or enable_receive_data_from_homemanager or (enable_indoor_outdoor_functionality and
         outdoor_source_type == 'Enviro'):
     es = ExternalSensors()
-    client = mqtt.Client(mqtt_client_name)
+    # client = mqtt.Client(mqtt_client_name)
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
     client.on_connect = on_connect
     client.on_message = on_message
     if mqtt_username and mqtt_password:
