@@ -721,13 +721,16 @@ def send_to_luftdaten(luft_values, id, enable_particle_sensor, enable_noise, luf
         all_responses_ok = False
     return all_responses_ok
     
-def on_connect(client, userdata, flags, rc):
-    es.print_update('Northcliff Environment Monitor Connected with result code ' + str(rc))
-    if enable_receive_data_from_homemanager:
-        client.subscribe(incoming_temp_hum_mqtt_topic) # Subscribe to the topic for the external temp/hum data
-        client.subscribe(incoming_barometer_mqtt_topic) # Subscribe to the topic for the external barometer data
-    if enable_indoor_outdoor_functionality and indoor_outdoor_function == 'Indoor' and outdoor_source_type == "Enviro":
-        client.subscribe(outdoor_mqtt_topic)
+def on_connect(client, userdata, flags, reason_code, properties):
+    es.print_update('Northcliff Environment Monitor Connected with result code ' + str(reason_code))
+    if reason_code == 0:
+        if enable_receive_data_from_homemanager:
+            client.subscribe(incoming_temp_hum_mqtt_topic) # Subscribe to the topic for the external temp/hum data
+            client.subscribe(incoming_barometer_mqtt_topic) # Subscribe to the topic for the external barometer data
+        if enable_indoor_outdoor_functionality and indoor_outdoor_function == 'Indoor' and outdoor_source_type == "Enviro":
+            client.subscribe(outdoor_mqtt_topic)
+    if reason_code > 0:
+        # error processing
 
 def on_message(client, userdata, msg):
     decoded_payload = str(msg.payload.decode("utf-8"))
@@ -1900,8 +1903,7 @@ logging.info("Wi-Fi: {}\n".format("connected" if check_wifi() else "disconnected
 if enable_send_data_to_homemanager or enable_receive_data_from_homemanager or (enable_indoor_outdoor_functionality and
         outdoor_source_type == 'Enviro'):
     es = ExternalSensors()
-    # client = mqtt.Client(mqtt_client_name)
-    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+    client = mqtt.Client(mqtt_client_name)
     client.on_connect = on_connect
     client.on_message = on_message
     if mqtt_username and mqtt_password:
