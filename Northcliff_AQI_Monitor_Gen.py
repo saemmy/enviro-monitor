@@ -40,6 +40,12 @@ import logging
 
 monitor_version = "7.2 - Gen"
 
+environment_log_file = '<Your Environment Log File Location Here>'
+mender_config_version_file = '<Your Mender Config Version File Location Here>'
+mender_software_version_file = '<Your Mender Software Version File Location Here>'
+persistent_data_log_file = '<Your Persistent Data Log File Name Here>'
+watchdog_file = '<Your Watchdog File Name Here>'
+
 logging.basicConfig(
     format='%(asctime)s.%(msecs)03d %(levelname)-8s %(message)s',
     level=logging.INFO,
@@ -467,7 +473,7 @@ def log_climate_and_gas(run_time, own_data, raw_red_rs, raw_oxi_rs, raw_nh3_rs, 
                                 'Red': own_data["Red"][1], 'NH3': own_data["NH3"][1], 'Raw OxiRS': raw_oxi_rs,
                                 'Raw RedRS': raw_red_rs, 'Raw NH3RS': raw_nh3_rs}
     print('Logging Environment Data.', environment_log_data)
-    with open('<Your Environment Log File Location Here>', 'a') as f:
+    with open(environment_log_file, 'a') as f:
         f.write(',\n' + json.dumps(environment_log_data))
     
 # Calculate Air Quality Level
@@ -2119,13 +2125,13 @@ else:
 
 # Capture software and config versions. Used to determine if a mender code or config update has been sent.
 try:
-    with open('<Your Mender Software Version File Location Here>', 'r') as f:
+    with open(mender_software_version_file, 'r') as f:
         startup_mender_software_version = f.read()
 except IOError:
     print('No Mender Software Version Available. Using Default')
     startup_mender_software_version = monitor_version
 try:
-    with open('<Your Mender Config Version File Location Here>', 'r') as f:
+    with open(mender_config_version_file, 'r') as f:
         startup_mender_config_version = f.read()
 except IOError:
     print('No Mender Config Version Available. Using Default')
@@ -2133,7 +2139,7 @@ except IOError:
 # Check for a persistence data log and use it if it exists and was < 10 minutes ago
 persistent_data_log = {}
 try:
-    with open('<Your Persistent Data Log File Name Here>', 'r') as f:
+    with open(persistent_data_log_file, 'r') as f:
         persistent_data_log = json.loads(f.read())
 except IOError:
     print('No Persistent Data Log Available. Using Defaults')
@@ -2302,7 +2308,7 @@ try:
                 # Write to the watchdog file unless there is a comms failure for >= comms_failure_tolerance
                 # when both Luftdaten and Adafruit IO arenabled
                 if comms_failure == False:
-                    with open('<Your Watchdog File Name Here>', 'w') as f:
+                    with open(watchdog_file, 'w') as f:
                         f.write('Enviro Script Alive')
                 if enable_luftdaten: # Send data to Luftdaten if enabled
                     luft_resp = send_to_luftdaten(luft_values, id, enable_particle_sensor, enable_noise, luft_noise_values, disable_luftdaten_sensor_upload)
@@ -2540,14 +2546,14 @@ try:
                     persistent_data_log["Own Noise Max Date Time"] = own_noise_max_datetime
                     persistent_data_log["Outdoor Noise Max Date Time"] = outdoor_noise_max_datetime
                     print('Logging Barometer, Forecast, Gas Calibration and Display Data')
-                    with open('<Your Persistent Data Log File Name Here>', 'w') as f:
+                    with open(persistent_data_log_file, 'w') as f:
                         f.write(json.dumps(persistent_data_log))
                     if "Forecast" in mqtt_values:
                         mqtt_values.pop("Forecast") # Remove Forecast after sending it to home manager so that
                         # forecast data is only sent when updated
                     # Check if there has been software or config update and restart code if either has been updated
                     try:
-                        with open('<Your Mender Software Version File Location Here>', 'r') as f:
+                        with open(mender_software_version_file, 'r') as f:
                             latest_mender_software_version = f.read()
                     except IOError:
                         print('No Mender Software Version Available')
@@ -2555,7 +2561,7 @@ try:
                     print("Startup Mender Software Version:", startup_mender_software_version,
                           "Latest Mender Software Version:", latest_mender_software_version)
                     try:
-                        with open('<Your Mender Config Version File Location Here>', 'r') as f:
+                        with open(mender_config_version_file, 'r') as f:
                             latest_mender_config_version = f.read()
                     except IOError:
                         print('No Mender Config Version Available')
