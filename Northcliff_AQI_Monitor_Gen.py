@@ -40,6 +40,8 @@ import logging
 
 monitor_version = "7.2 - Gen"
 
+### File names to be adapted to your needs ###
+config_file = '<Your config.json file location>'
 environment_log_file = '<Your Environment Log File Location Here>'
 mender_config_version_file = '<Your Mender Config Version File Location Here>'
 mender_software_version_file = '<Your Mender Software Version File Location Here>'
@@ -83,7 +85,7 @@ disp.begin()
 
 def retrieve_config():
     try:
-        with open('Config/config.json', 'r') as f:
+        with open(config_file, 'r') as f:
             parsed_config_parameters = json.loads(f.read())
             print('Retrieved Config', parsed_config_parameters)
     except IOError:
