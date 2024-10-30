@@ -739,6 +739,7 @@ def on_connect(client, userdata, flags, reason_code, properties):
             client.subscribe(outdoor_mqtt_topic)
     if reason_code > 0:
         # error processing
+        print('Error with reason:' str(reason_code))
 
 def on_message(client, userdata, msg):
     decoded_payload = str(msg.payload.decode("utf-8"))
