@@ -1912,7 +1912,7 @@ logging.info("Wi-Fi: {}\n".format("connected" if check_wifi() else "disconnected
 if enable_send_data_to_homemanager or enable_receive_data_from_homemanager or (enable_indoor_outdoor_functionality and
         outdoor_source_type == 'Enviro'):
     es = ExternalSensors()
-    client = mqtt.Client(mqtt_client_name)
+    client = mqtt.Client(client_id=mqtt_client_name, callback_api_version=mqtt_client.CallbackAPIVersion.VERSION2)
     client.on_connect = on_connect
     client.on_message = on_message
     if mqtt_username and mqtt_password:
